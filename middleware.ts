@@ -11,11 +11,11 @@ export function middleware(request: NextRequest) {
   const maxRequests = parseInt(process.env.RATE_LIMIT_MAX || "100");
 
   // Clean up old entries
-  for (const [key, value] of rateLimitMap.entries()) {
+  rateLimitMap.forEach((value, key) => {
     if (now > value.resetTime) {
       rateLimitMap.delete(key);
     }
-  }
+  });
 
   // Check rate limit
   const current = rateLimitMap.get(ip);

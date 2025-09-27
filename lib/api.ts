@@ -182,7 +182,7 @@ export const coinMarketCapApi = {
 
     // Get social media data for the filtered cryptocurrencies
     const cryptoIds = filteredData.map((crypto) => crypto.id);
-    let socialMediaData = {};
+    let socialMediaData: { [key: number]: any } = {};
 
     if (cryptoIds.length > 0) {
       try {
@@ -239,7 +239,7 @@ export const coinMarketCapApi = {
 
     // Get social media data for the filtered cryptocurrencies
     const cryptoIds = filteredData.map((crypto) => crypto.id);
-    let socialMediaData = {};
+    let socialMediaData: { [key: number]: any } = {};
 
     if (cryptoIds.length > 0) {
       try {
