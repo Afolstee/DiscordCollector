@@ -11,7 +11,9 @@ export async function GET(request: NextRequest) {
 
     if (symbol) {
       // Get specific cryptocurrency data
-      const data = await coinMarketCapApi.getCryptocurrencyInfo(symbol);
+      const data = await coinMarketCapApi.getCryptocurrencyQuotesBySymbol(
+        symbol
+      );
       return NextResponse.json({
         success: true,
         data: data.data,

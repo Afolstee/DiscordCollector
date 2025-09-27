@@ -114,7 +114,7 @@ export const coinMarketCapApi = {
     return response.data;
   },
 
-  async getCryptocurrencyInfo(symbol: string) {
+  async getCryptocurrencyQuotesBySymbol(symbol: string) {
     const response = await cmcApi.get<
       CoinMarketCapResponse<{ [key: string]: Cryptocurrency }>
     >("/cryptocurrency/quotes/latest", {
