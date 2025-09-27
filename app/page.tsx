@@ -25,21 +25,23 @@ export default function HomePage() {
   const [filter, setFilter] = useState<FilterType>("all");
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
       {/* Hero Section */}
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold tracking-tight mb-4">
+      <div className="text-center mb-8 sm:mb-12">
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
           Crypto Discord
         </h1>
       </div>
 
       {/* New Cryptocurrency Listings */}
       <div className="mt-12">
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Latest Cryptocurrency Listings</h2>
+        <div className="mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold mb-4">
+            Latest Cryptocurrency Listings
+          </h2>
 
           {/* Filter Buttons */}
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button
               variant={filter === "all" ? "default" : "outline"}
               size="sm"
@@ -77,20 +79,25 @@ export default function HomePage() {
 
 function NewListingsSkeleton() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
       {Array.from({ length: 24 }).map((_, i) => (
         <Card key={i} className="animate-pulse">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="h-6 bg-muted rounded w-1/3"></div>
-              <div className="h-4 bg-muted rounded w-1/4"></div>
+          <CardHeader className="px-4 sm:px-6">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-muted rounded-full"></div>
+              <div className="flex-1">
+                <div className="h-4 sm:h-5 bg-muted rounded w-3/4 mb-2"></div>
+                <div className="h-3 bg-muted rounded w-1/2"></div>
+              </div>
             </div>
-            <div className="h-8 bg-muted rounded w-1/2"></div>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="h-4 bg-muted rounded w-full"></div>
-              <div className="h-4 bg-muted rounded w-2/3"></div>
+          <CardContent className="px-4 sm:px-6">
+            <div className="space-y-3">
+              <div className="h-3 bg-muted rounded w-1/3"></div>
+              <div className="space-y-2">
+                <div className="h-8 bg-muted rounded"></div>
+                <div className="h-8 bg-muted rounded"></div>
+              </div>
             </div>
           </CardContent>
         </Card>
