@@ -44,11 +44,22 @@ export async function POST(request: NextRequest) {
 
     // Database operations are disabled for now
     // TODO: Implement database storage when database is set up
-    console.log("Database storage disabled - coin data:", { coinId, name, symbol, slug });
+    console.log("Database storage disabled - coin data:", {
+      coinId,
+      name,
+      symbol,
+      slug,
+    });
 
     return NextResponse.json({
       success: true,
-      data: { coinId, name, symbol, slug, message: "Database storage disabled" },
+      data: {
+        coinId,
+        name,
+        symbol,
+        slug,
+        message: "Database storage disabled",
+      },
     });
   } catch (error) {
     console.error("API Error:", error);
