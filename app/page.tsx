@@ -103,7 +103,7 @@ export default function HomePage() {
             </p>
           </div>
           <Suspense fallback={<NewListingsSkeleton />}>
-            <NewListings limit={100} showFilters={false} filter={filter} />
+            <NewListings limit={150} showFilters={false} filter={filter} />
           </Suspense>
         </div>
 
@@ -119,7 +119,7 @@ export default function HomePage() {
             </p>
           </div>
           <Suspense fallback={<NewListingsSkeleton />}>
-            <TrendingListings limit={100} filter={filter} />
+            <TrendingListings limit={150} filter={filter} />
           </Suspense>
         </div>
       </div>
