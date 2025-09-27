@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { coinMarketCapApi } from "@/lib/api";
-import { prisma } from "@/lib/db";
 
 export async function GET(request: NextRequest) {
   try {
@@ -43,34 +42,20 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { coinId, name, symbol, slug } = body;
 
-    // Store coin data in database
-    const coinData = await prisma.coinData.upsert({
-      where: { coinId },
-      update: {
-        name,
-        symbol,
-        slug,
-        lastUpdated: new Date(),
-      },
-      create: {
-        coinId,
-        name,
-        symbol,
-        slug,
-        lastUpdated: new Date(),
-      },
-    });
+    // Database operations are disabled for now
+    // TODO: Implement database storage when database is set up
+    console.log("Database storage disabled - coin data:", { coinId, name, symbol, slug });
 
     return NextResponse.json({
       success: true,
-      data: coinData,
+      data: { coinId, name, symbol, slug, message: "Database storage disabled" },
     });
   } catch (error) {
-    console.error("Database Error:", error);
+    console.error("API Error:", error);
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to store coin data",
+        error: "Failed to process coin data",
       },
       { status: 500 }
     );
