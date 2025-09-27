@@ -3,33 +3,104 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, MessageCircle, Twitter, Github, ExternalLink, Globe } from "lucide-react";
+import { RefreshCw, MessageCircle, Twitter, Github, ExternalLink, TrendingUp, TrendingDown } from "lucide-react";
 import Image from "next/image";
-import { formatDate } from "@/utils/format";
+import { formatDate, formatPercentage } from "@/utils/format";
 import type { Cryptocurrency } from "@/types";
 
-interface FilteredListingsProps {
-  listings: Cryptocurrency[];
+interface TrendingListingsProps {
+  limit?: number;
   filter: "all" | "discord" | "telegram";
-  retryFetch: () => void;
-  getSocialMediaLinks: (crypto: Cryptocurrency) => {
-    website: string;
-    twitter: string | null;
-    reddit: string | null;
-    telegram: string | null;
-    discord: string | null;
-    github: string | null;
-    explorer: string | null;
-    announcement: string | null;
-  };
 }
 
-export function FilteredListings({
-  listings,
+export function TrendingListings({
+  limit = 100,
   filter,
-  retryFetch,
-  getSocialMediaLinks,
-}: FilteredListingsProps) {
+}: TrendingListingsProps) {
+  const [listings, setListings] = useState<Cryptocurrency[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchTrendingListings();
+  }, [limit]);
+
+  const fetchTrendingListings = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const params = new URLSearchParams({
+        limit: limit.toString(),
+      });
+
+      const response = await fetch(`/api/trending?${params}`);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        const listingsData = Array.isArray(data.data) ? data.data : [];
+        setListings(listingsData);
+
+        if (listingsData.length === 0) {
+          setError("No trending cryptocurrencies found.");
+        }
+      } else {
+        setError(data.error || data.message || "Failed to fetch trending cryptocurrencies");
+      }
+    } catch (err: any) {
+      console.error("Trending fetch error:", err);
+      setError(err.message || "Failed to fetch trending cryptocurrencies");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Function to get social media links from CMC data
+  const getSocialMediaLinks = (crypto: Cryptocurrency) => {
+    const urls = crypto.urls || {};
+
+    // Helper function to find Discord links in chat array
+    const findDiscordLink = (chatArray: string[] | undefined) => {
+      if (!chatArray) return null;
+      return (
+        chatArray.find(
+          (link) =>
+            link.includes("discord.gg") ||
+            link.includes("discord.com") ||
+            link.includes("discordapp.com")
+        ) || null
+      );
+    };
+
+    // Helper function to find Telegram links in chat array
+    const findTelegramLink = (chatArray: string[] | undefined) => {
+      if (!chatArray) return null;
+      return (
+        chatArray.find(
+          (link) => link.includes("t.me") || link.includes("telegram.me")
+        ) || null
+      );
+    };
+
+    return {
+      website:
+        urls.website?.[0] ||
+        `https://coinmarketcap.com/currencies/${crypto.slug}`,
+      twitter: urls.twitter?.[0] || null,
+      reddit: urls.reddit?.[0] || null,
+      telegram: findTelegramLink(urls.chat) || null,
+      discord: findDiscordLink(urls.chat) || null,
+      github: urls.source_code?.[0] || null,
+      explorer: urls.explorer?.[0] || null,
+      announcement: urls.announcement?.[0] || null,
+    };
+  };
+
   // Function to check if cryptocurrency has any social media links
   const hasSocialMedia = (crypto: Cryptocurrency) => {
     const socialLinks = getSocialMediaLinks(crypto);
@@ -70,11 +141,48 @@ export function FilteredListings({
 
   const filteredListings = filterListings(listings, filter);
 
+  const retryFetch = () => {
+    fetchTrendingListings();
+  };
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <Card key={i} className="animate-pulse">
+            <CardHeader>
+              <div className="h-4 bg-muted rounded w-1/2"></div>
+              <div className="h-6 bg-muted rounded w-3/4"></div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <div className="h-4 bg-muted rounded w-full"></div>
+                <div className="h-4 bg-muted rounded w-2/3"></div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  if (error && filteredListings.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-destructive mb-4">{error}</p>
+        <Button onClick={retryFetch} className="flex items-center gap-2">
+          <RefreshCw className="h-4 w-4" />
+          Try Again
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold">
-          Recent Listings ({filteredListings.length})
+          Trending Cryptocurrencies ({filteredListings.length})
         </h3>
         <Button
           onClick={retryFetch}
@@ -90,6 +198,8 @@ export function FilteredListings({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
         {filteredListings.map((crypto) => {
           const socialLinks = getSocialMediaLinks(crypto);
+          const priceChange24h = crypto.quote.USD.percent_change_24h;
+          const isPositive = priceChange24h > 0;
 
           return (
             <Card key={crypto.id} className="hover:shadow-lg transition-shadow">
@@ -111,9 +221,15 @@ export function FilteredListings({
                     <CardTitle className="text-base sm:text-lg font-bold truncate">
                       {crypto.name || "Unknown Token"}
                     </CardTitle>
-                    <p className="text-xs sm:text-sm text-muted-foreground">
-                      {crypto.symbol || "Unknown"}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-xs sm:text-sm text-muted-foreground">
+                        {crypto.symbol || "Unknown"}
+                      </p>
+                      <div className={`flex items-center gap-1 text-xs ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+                        {isPositive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                        {formatPercentage(Math.abs(priceChange24h))}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </CardHeader>
@@ -276,6 +392,14 @@ export function FilteredListings({
           );
         })}
       </div>
+
+      {filteredListings.length === 0 && !loading && !error && (
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">
+            No trending cryptocurrencies found with social media presence for the selected filter.
+          </p>
+        </div>
+      )}
     </>
   );
 }

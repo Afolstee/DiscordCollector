@@ -186,14 +186,30 @@ export function NewListings({
     };
   };
 
+  // Function to check if cryptocurrency has any social media links
+  const hasSocialMedia = (crypto: Cryptocurrency) => {
+    const socialLinks = getSocialMediaLinks(crypto);
+    return (
+      socialLinks.twitter !== null ||
+      socialLinks.reddit !== null ||
+      socialLinks.telegram !== null ||
+      socialLinks.discord !== null ||
+      socialLinks.github !== null ||
+      socialLinks.announcement !== null
+    );
+  };
+
   // Function to filter listings based on social media presence
   const filterListings = (
     listings: Cryptocurrency[],
     filterType: "all" | "discord" | "telegram"
   ) => {
-    if (filterType === "all") return listings;
+    // First filter out cryptocurrencies without any social media
+    const cryptosWithSocialMedia = listings.filter((crypto) => hasSocialMedia(crypto));
 
-    return listings.filter((crypto) => {
+    if (filterType === "all") return cryptosWithSocialMedia;
+
+    return cryptosWithSocialMedia.filter((crypto) => {
       const socialLinks = getSocialMediaLinks(crypto);
 
       if (filterType === "discord") {

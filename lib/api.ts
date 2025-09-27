@@ -114,6 +114,50 @@ export const coinMarketCapApi = {
     return response.data;
   },
 
+  async getTrendingCryptocurrencies(start = 1, limit = 100, convert = "USD") {
+    // Get trending cryptocurrencies based on 24h volume and price change
+    const response = await cmcApi.get<
+      CoinMarketCapResponse<CryptocurrencyListings[]>
+    >("/cryptocurrency/listings/latest", {
+      params: {
+        start,
+        limit,
+        convert,
+        sort: "percent_change_24h",
+        sort_dir: "desc",
+      },
+    });
+
+    // Filter trending data and get social media info
+    const trendingData = response.data.data.slice(0, limit);
+    
+    // Get social media data for the trending cryptocurrencies
+    const cryptoIds = trendingData.map((crypto) => crypto.id);
+    let socialMediaData: { [key: number]: any } = {};
+
+    if (cryptoIds.length > 0) {
+      try {
+        const infoResponse = await this.getCryptocurrencyInfo(cryptoIds);
+        socialMediaData = infoResponse.data;
+      } catch (error) {
+        console.warn("Failed to fetch social media data for trending:", error);
+      }
+    }
+
+    // Merge social media data with trending data
+    const enrichedData = trendingData.map((crypto) => ({
+      ...crypto,
+      urls: socialMediaData[crypto.id]?.urls,
+      logo: socialMediaData[crypto.id]?.logo,
+      description: socialMediaData[crypto.id]?.description,
+    }));
+
+    return {
+      ...response.data,
+      data: enrichedData,
+    };
+  },
+
   async getCryptocurrencyQuotesBySymbol(symbol: string) {
     const response = await cmcApi.get<
       CoinMarketCapResponse<{ [key: string]: Cryptocurrency }>

@@ -18,11 +18,14 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { NewListings } from "@/components/new-listings";
+import { TrendingListings } from "@/components/trending-listings";
 
 type FilterType = "all" | "discord" | "telegram";
+type TabType = "recent" | "trending";
 
 export default function HomePage() {
   const [filter, setFilter] = useState<FilterType>("all");
+  const [activeTab, setActiveTab] = useState<TabType>("recent");
 
   return (
     <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
@@ -33,45 +36,92 @@ export default function HomePage() {
         </h1>
       </div>
 
-      {/* New Cryptocurrency Listings */}
-      <div className="mt-12">
-        <div className="mb-6">
-          <h2 className="text-xl sm:text-2xl font-bold mb-4">
-            Latest Cryptocurrency Listings
-          </h2>
-
-          {/* Filter Buttons */}
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant={filter === "all" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setFilter("all")}
-              className="flex items-center gap-2"
-            >
-              <Filter className="h-4 w-4" />
-              All
-            </Button>
-            <Button
-              variant={filter === "discord" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setFilter("discord")}
-              className="flex items-center gap-2"
-            >
-              Discord
-            </Button>
-            <Button
-              variant={filter === "telegram" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setFilter("telegram")}
-              className="flex items-center gap-2"
-            >
-              Telegram
-            </Button>
-          </div>
+      {/* Tab Navigation */}
+      <div className="mb-6">
+        <div className="flex flex-wrap gap-2 mb-6">
+          <Button
+            variant={activeTab === "recent" ? "default" : "outline"}
+            size="lg"
+            onClick={() => setActiveTab("recent")}
+            className="flex items-center gap-2"
+          >
+            <BarChart3 className="h-5 w-5" />
+            Recently Added
+          </Button>
+          <Button
+            variant={activeTab === "trending" ? "default" : "outline"}
+            size="lg"
+            onClick={() => setActiveTab("trending")}
+            className="flex items-center gap-2"
+          >
+            <TrendingUp className="h-5 w-5" />
+            Trending
+          </Button>
         </div>
-        <Suspense fallback={<NewListingsSkeleton />}>
-          <NewListings limit={100} showFilters={false} filter={filter} />
-        </Suspense>
+
+        {/* Filter Buttons */}
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant={filter === "all" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setFilter("all")}
+            className="flex items-center gap-2"
+          >
+            <Filter className="h-4 w-4" />
+            All
+          </Button>
+          <Button
+            variant={filter === "discord" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setFilter("discord")}
+            className="flex items-center gap-2"
+          >
+            Discord
+          </Button>
+          <Button
+            variant={filter === "telegram" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setFilter("telegram")}
+            className="flex items-center gap-2"
+          >
+            Telegram
+          </Button>
+        </div>
+      </div>
+
+      {/* Tab Content */}
+      <div className="mt-8">
+        {/* Recently Added Tab */}
+        <div className={activeTab === "recent" ? "block" : "hidden"}>
+          <div className="mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4 flex items-center gap-2">
+              <BarChart3 className="h-6 w-6 text-blue-500" />
+              Recently Added Cryptocurrencies
+            </h2>
+            <p className="text-muted-foreground">
+              Latest cryptocurrency listings with social media presence
+            </p>
+          </div>
+          <Suspense fallback={<NewListingsSkeleton />}>
+            <NewListings limit={100} showFilters={false} filter={filter} />
+          </Suspense>
+        </div>
+
+        {/* Trending Tab */}
+        <div className={activeTab === "trending" ? "block" : "hidden"}>
+          <div className="mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4 flex items-center gap-2">
+              <TrendingUp className="h-6 w-6 text-green-500" />
+              Top 100 Trending Cryptocurrencies
+            </h2>
+            <p className="text-muted-foreground">
+              Based on 24-hour price performance with social media presence
+            </p>
+          </div>
+          <Suspense fallback={<NewListingsSkeleton />}>
+            <TrendingListings limit={100} filter={filter} />
+          </Suspense>
+        </div>
       </div>
     </div>
   );
