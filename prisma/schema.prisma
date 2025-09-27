@@ -1,0 +1,94 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  watchlists Watchlist[]
+  portfolios Portfolio[]
+  
+  @@map("users")
+}
+
+model Watchlist {
+  id        String   @id @default(cuid())
+  name      String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  coins     WatchlistCoin[]
+  
+  @@map("watchlists")
+}
+
+model WatchlistCoin {
+  id          String    @id @default(cuid())
+  watchlistId String
+  coinId      String
+  addedAt     DateTime  @default(now())
+  
+  // Relations
+  watchlist Watchlist @relation(fields: [watchlistId], references: [id], onDelete: Cascade)
+  
+  @@unique([watchlistId, coinId])
+  @@map("watchlist_coins")
+}
+
+model Portfolio {
+  id        String   @id @default(cuid())
+  name      String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  user  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  coins PortfolioCoin[]
+  
+  @@map("portfolios")
+}
+
+model PortfolioCoin {
+  id          String    @id @default(cuid())
+  portfolioId String
+  coinId      String
+  amount      Float
+  buyPrice    Float
+  buyDate     DateTime
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  
+  @@map("portfolio_coins")
+}
+
+model CoinData {
+  id           String   @id @default(cuid())
+  coinId       String   @unique
+  name         String
+  symbol       String
+  slug         String
+  lastUpdated  DateTime @default(now())
+  
+  @@map("coin_data")
+}
