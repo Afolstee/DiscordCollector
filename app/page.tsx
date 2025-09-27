@@ -1,4 +1,6 @@
-import { Suspense } from "react";
+"use client";
+
+import { Suspense, useState } from "react";
 import {
   Card,
   CardContent,
@@ -7,11 +9,21 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { TrendingUp, TrendingDown, DollarSign, BarChart3 } from "lucide-react";
+import {
+  TrendingUp,
+  TrendingDown,
+  DollarSign,
+  BarChart3,
+  Filter,
+} from "lucide-react";
 import Link from "next/link";
 import { NewListings } from "@/components/new-listings";
 
+type FilterType = "all" | "discord" | "telegram";
+
 export default function HomePage() {
+  const [filter, setFilter] = useState<FilterType>("all");
+
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Hero Section */}
@@ -23,29 +35,42 @@ export default function HomePage() {
 
       {/* New Cryptocurrency Listings */}
       <div className="mt-12">
-        <div className="mb-6">
+        <div className="mb-6 flex items-center justify-between">
           <h2 className="text-2xl font-bold">Latest Cryptocurrency Listings</h2>
+
+          {/* Filter Buttons */}
+          <div className="flex gap-2">
+            <Button
+              variant={filter === "all" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setFilter("all")}
+              className="flex items-center gap-2"
+            >
+              <Filter className="h-4 w-4" />
+              All
+            </Button>
+            <Button
+              variant={filter === "discord" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setFilter("discord")}
+              className="flex items-center gap-2"
+            >
+              Discord
+            </Button>
+            <Button
+              variant={filter === "telegram" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setFilter("telegram")}
+              className="flex items-center gap-2"
+            >
+              Telegram
+            </Button>
+          </div>
         </div>
         <Suspense fallback={<NewListingsSkeleton />}>
-          <NewListings limit={100} showFilters={false} />
+          <NewListings limit={100} showFilters={false} filter={filter} />
         </Suspense>
       </div>
-
-    </div>
-  );
-}
-
-function GlobalMetricsSkeleton() {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-      {[1, 2, 3].map((i) => (
-        <Card key={i}>
-          <CardHeader>
-            <div className="h-4 bg-muted animate-pulse rounded w-1/2"></div>
-            <div className="h-8 bg-muted animate-pulse rounded w-3/4"></div>
-          </CardHeader>
-        </Card>
-      ))}
     </div>
   );
 }
